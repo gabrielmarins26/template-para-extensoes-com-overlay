@@ -9,7 +9,7 @@
   },
   "content_scripts": [
     {
-      "matches": ["*://www.google.com/*"],
+      "matches": ["*://example.com/*"],
       "js": ["src/utils.js", "src/overlay.js"],
       "run_at": "document_end"
     }
@@ -20,7 +20,7 @@
   "web_accessible_resources": [
     {
       "resources": ["templates/overlay.html", "templates/overlay.css"],
-      "matches": ["*://www.google.com/*"]
+      "matches": ["*://example.com/*"]
     }
   ]
 }
