@@ -3,24 +3,14 @@
   "name": "Chrome Extension Base",
   "version": "1.2",
   "description": "Extensão base para desenvolvimento de outras extensões com overlay e sistema de abas",
-  "permissions": [
-    "activeTab",
-    "tabs",
-    "identity",
-    "identity.email"
-  ],
+  "permissions": ["activeTab", "tabs", "identity", "identity.email"],
   "background": {
     "service_worker": "src/background.js"
   },
   "content_scripts": [
     {
-      "matches": [
-        "*://www.google.com/*"
-      ],
-      "js": [
-        "src/utils.js",
-        "src/overlay.js"
-      ],
+      "matches": ["*://www.google.com/*"],
+      "js": ["src/utils.js", "src/overlay.js"],
       "run_at": "document_end"
     }
   ],
@@ -29,13 +19,8 @@
   },
   "web_accessible_resources": [
     {
-      "resources": [
-        "templates/overlay.html",
-        "templates/overlay.css"
-      ],
-      "matches": [
-        "*://www.google.com/*"
-      ]
+      "resources": ["templates/overlay.html", "templates/overlay.css"],
+      "matches": ["*://www.google.com/*"]
     }
   ]
 }

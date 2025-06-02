@@ -1,26 +1,12 @@
 // Overlay.js - Gerencia o banco de textos
 window.OverlayManager = {
   overlayVisible: false,
-  currentUserEmail: null,
   currentTextId: null,
 
   // Inicializa a extensão
   init: function () {
-    console.log('Banco de Textos initialized');
+    console.log("Banco de Textos initialized");
     this.setupMessageListener();
-    this.getUserEmail();
-  },
-
-  // Obtém email do usuário via background
-  getUserEmail: function () {
-    chrome.runtime.sendMessage({ action: "get_user_email" }, (response) => {
-      if (response && response.email) {
-        this.currentUserEmail = response.email;
-        console.log('Email do usuário:', this.currentUserEmail);
-      } else {
-        this.currentUserEmail = 'user@local.com'; // Fallback para testes
-      }
-    });
   },
 
   // Escuta mensagens do background script
@@ -44,24 +30,24 @@ window.OverlayManager = {
 
   // Cria e mostra o overlay
   showOverlay: async function () {
-    if (document.getElementById('extension-overlay')) {
-      document.getElementById('extension-overlay').style.display = 'block';
+    if (document.getElementById("extension-overlay")) {
+      document.getElementById("extension-overlay").style.display = "block";
       this.overlayVisible = true;
       return;
     }
 
     try {
       // Cria o container principal
-      const container = document.createElement('div');
-      container.id = 'extension-overlay';
+      const container = document.createElement("div");
+      container.id = "extension-overlay";
 
       // Cria Shadow DOM
-      const shadowRoot = container.attachShadow({ mode: 'open' });
+      const shadowRoot = container.attachShadow({ mode: "open" });
 
       // Carrega HTML e CSS
       const [htmlContent, cssContent] = await Promise.all([
         this.loadOverlayHTML(),
-        this.loadOverlayCSS()
+        this.loadOverlayCSS(),
       ]);
 
       // Injeta CSS e HTML no Shadow DOM
@@ -80,10 +66,18 @@ window.OverlayManager = {
       this.loadInitialData(shadowRoot);
 
       this.overlayVisible = true;
-      console.log('Overlay do Banco de Textos criado e exibido');
-
+      console.log("Overlay do Banco de Textos criado e exibido");
     } catch (error) {
-      console.error('Erro ao criar overlay:', error);
+      console.error("Erro ao criar overlay:", error);
+    }
+  },
+
+  // Esconde o overlay
+  hideOverlay: function () {
+    const overlay = document.getElementById("extension-overlay");
+    if (overlay) {
+      overlay.style.display = "none";
+      this.overlayVisible = false;
     }
   },
 
@@ -96,7 +90,7 @@ window.OverlayManager = {
 
   // Atualiza exibição do email do usuário
   updateUserEmailDisplay: function (shadowRoot) {
-    const emailInput = shadowRoot.querySelector('#user-email');
+    const emailInput = shadowRoot.querySelector("#user-email");
     if (emailInput && this.currentUserEmail) {
       emailInput.value = this.currentUserEmail;
     }
@@ -104,37 +98,30 @@ window.OverlayManager = {
 
   // Carrega o HTML do overlay
   loadOverlayHTML: async function () {
-    const htmlFilePath = chrome.runtime.getURL('templates/overlay.html');
+    const htmlFilePath = chrome.runtime.getURL("templates/overlay.html");
     const response = await fetch(htmlFilePath);
     const fullHTML = await response.text();
 
     // Extrai apenas o conteúdo do body
     const parser = new DOMParser();
-    const doc = parser.parseFromString(fullHTML, 'text/html');
+    const doc = parser.parseFromString(fullHTML, "text/html");
     return doc.body.innerHTML;
   },
 
   // Carrega o CSS do overlay
   loadOverlayCSS: async function () {
-    const cssFilePath = chrome.runtime.getURL('templates/overlay.css');
+    const cssFilePath = chrome.runtime.getURL("templates/overlay.css");
     const response = await fetch(cssFilePath);
     return await response.text();
   },
 
-  // Esconde o overlay
-  hideOverlay: function () {
-    const overlay = document.getElementById('extension-overlay');
-    if (overlay) {
-      overlay.style.display = 'none';
-      this.overlayVisible = false;
-    }
-  },
-
   // Reload da extensão
   handleUpdate: function () {
-    this.showFeedback('Recarregando...', null, 'info');
+    this.showFeedback("Recarregando...", null, "info");
 
-    let reloadConfirmation = confirm("Tem certeza que deseja recarregar a extensão e a página?");
+    let reloadConfirmation = confirm(
+      "Tem certeza que deseja recarregar a extensão e a página?"
+    );
 
     if (reloadConfirmation) {
       chrome.runtime.sendMessage({ action: "reload_extension" });
@@ -152,14 +139,14 @@ window.OverlayManager = {
     this.setupTabSystem(shadowRoot);
 
     // Botão fechar
-    const closeBtn = shadowRoot.querySelector('#close-btn');
+    const closeBtn = shadowRoot.querySelector("#close-btn");
     if (closeBtn) {
-      closeBtn.addEventListener('click', () => this.hideOverlay());
+      closeBtn.addEventListener("click", () => this.hideOverlay());
     }
 
-    const updateBtn = shadowRoot.querySelector('#update-btn');
+    const updateBtn = shadowRoot.querySelector("#update-btn");
     if (updateBtn) {
-      updateBtn.addEventListener('click', () => this.handleUpdate());
+      updateBtn.addEventListener("click", () => this.handleUpdate());
     }
 
     // Eventos da aba de textos
@@ -171,28 +158,28 @@ window.OverlayManager = {
 
   // Configura sistema de abas
   setupTabSystem: function (shadowRoot) {
-    const tabButtons = shadowRoot.querySelectorAll('.tab-btn');
-    const tabContents = shadowRoot.querySelectorAll('.tab-content');
+    const tabButtons = shadowRoot.querySelectorAll(".tab-btn");
+    const tabContents = shadowRoot.querySelectorAll(".tab-content");
 
-    tabButtons.forEach(button => {
-      button.addEventListener('click', (e) => {
-        const targetTab = e.target.getAttribute('data-tab');
+    tabButtons.forEach((button) => {
+      button.addEventListener("click", (e) => {
+        const targetTab = e.target.getAttribute("data-tab");
 
         // Remove active de todos os botões e conteúdos
-        tabButtons.forEach(btn => btn.classList.remove('active'));
-        tabContents.forEach(content => content.classList.remove('active'));
+        tabButtons.forEach((btn) => btn.classList.remove("active"));
+        tabContents.forEach((content) => content.classList.remove("active"));
 
         // Adiciona active ao botão clicado
-        e.target.classList.add('active');
+        e.target.classList.add("active");
 
         // Mostra o conteúdo correspondente
         const targetContent = shadowRoot.querySelector(`#${targetTab}-tab`);
         if (targetContent) {
-          targetContent.classList.add('active');
+          targetContent.classList.add("active");
         }
 
         // Carrega logs se necessário
-        if (targetTab === 'settings') {
+        if (targetTab === "settings") {
           this.updateLogsDisplay(shadowRoot);
         }
       });
@@ -201,31 +188,31 @@ window.OverlayManager = {
 
   // Eventos da aba de textos
   setupTextsTabEvents: function (shadowRoot) {
-    const textSelect = shadowRoot.querySelector('#text-select');
-    const saveBtn = shadowRoot.querySelector('#save-text-btn');
-    const deleteBtn = shadowRoot.querySelector('#delete-text-btn');
-    const clearBtn = shadowRoot.querySelector('#clear-form-btn');
+    const textSelect = shadowRoot.querySelector("#text-select");
+    const saveBtn = shadowRoot.querySelector("#save-text-btn");
+    const deleteBtn = shadowRoot.querySelector("#delete-text-btn");
+    const clearBtn = shadowRoot.querySelector("#clear-form-btn");
 
     if (textSelect) {
-      textSelect.addEventListener('change', (e) => {
+      textSelect.addEventListener("change", (e) => {
         this.loadSelectedText(e.target.value, shadowRoot);
       });
     }
 
     if (saveBtn) {
-      saveBtn.addEventListener('click', () => {
+      saveBtn.addEventListener("click", () => {
         this.saveText(shadowRoot);
       });
     }
 
     if (deleteBtn) {
-      deleteBtn.addEventListener('click', () => {
+      deleteBtn.addEventListener("click", () => {
         this.deleteText(shadowRoot);
       });
     }
 
     if (clearBtn) {
-      clearBtn.addEventListener('click', () => {
+      clearBtn.addEventListener("click", () => {
         this.clearForm(shadowRoot);
       });
     }
@@ -233,24 +220,24 @@ window.OverlayManager = {
 
   // Eventos da aba configurações
   setupSettingsTabEvents: function (shadowRoot) {
-    const saveSettingsBtn = shadowRoot.querySelector('#save-settings-btn');
-    const clearLogsBtn = shadowRoot.querySelector('#clear-logs-btn');
-    const storeLogsCheckbox = shadowRoot.querySelector('#store-logs-checkbox');
+    const saveSettingsBtn = shadowRoot.querySelector("#save-settings-btn");
+    const clearLogsBtn = shadowRoot.querySelector("#clear-logs-btn");
+    const storeLogsCheckbox = shadowRoot.querySelector("#store-logs-checkbox");
 
     if (saveSettingsBtn) {
-      saveSettingsBtn.addEventListener('click', () => {
+      saveSettingsBtn.addEventListener("click", () => {
         this.saveSettings(shadowRoot);
       });
     }
 
     if (clearLogsBtn) {
-      clearLogsBtn.addEventListener('click', () => {
+      clearLogsBtn.addEventListener("click", () => {
         this.clearLogs(shadowRoot);
       });
     }
 
     if (storeLogsCheckbox) {
-      storeLogsCheckbox.addEventListener('change', () => {
+      storeLogsCheckbox.addEventListener("change", () => {
         this.updateLogsDisplay(shadowRoot);
       });
     }
@@ -258,21 +245,22 @@ window.OverlayManager = {
 
   // Carrega textos do storage
   loadTexts: function (shadowRoot) {
-    const texts = window.StorageUtils.load('texts', this.currentUserEmail, []);
+    const texts = window.StorageUtils.load("texts", this.currentUserEmail, []);
     this.updateTextSelect(texts, shadowRoot);
   },
 
   // Atualiza o select com os textos
   updateTextSelect: function (texts, shadowRoot) {
-    const textSelect = shadowRoot.querySelector('#text-select');
+    const textSelect = shadowRoot.querySelector("#text-select");
     if (!textSelect) return;
 
     // Limpa options existentes
-    textSelect.innerHTML = '<option value="">Selecione um texto ou crie novo</option>';
+    textSelect.innerHTML =
+      '<option value="">Selecione um texto ou crie novo</option>';
 
     // Adiciona options dos textos
-    texts.forEach(text => {
-      const option = document.createElement('option');
+    texts.forEach((text) => {
+      const option = document.createElement("option");
       option.value = text.id;
       option.textContent = text.title;
       textSelect.appendChild(option);
@@ -286,12 +274,12 @@ window.OverlayManager = {
       return;
     }
 
-    const texts = window.StorageUtils.load('texts', this.currentUserEmail, []);
-    const selectedText = texts.find(text => text.id === textId);
+    const texts = window.StorageUtils.load("texts", this.currentUserEmail, []);
+    const selectedText = texts.find((text) => text.id === textId);
 
     if (selectedText) {
-      const titleInput = shadowRoot.querySelector('#text-title');
-      const contentTextarea = shadowRoot.querySelector('#text-content');
+      const titleInput = shadowRoot.querySelector("#text-title");
+      const contentTextarea = shadowRoot.querySelector("#text-content");
 
       if (titleInput) titleInput.value = selectedText.title;
       if (contentTextarea) contentTextarea.value = selectedText.content;
@@ -302,8 +290,8 @@ window.OverlayManager = {
 
   // Salva texto
   saveText: function (shadowRoot) {
-    const titleInput = shadowRoot.querySelector('#text-title');
-    const contentTextarea = shadowRoot.querySelector('#text-content');
+    const titleInput = shadowRoot.querySelector("#text-title");
+    const contentTextarea = shadowRoot.querySelector("#text-content");
 
     if (!titleInput || !contentTextarea) return;
 
@@ -311,21 +299,23 @@ window.OverlayManager = {
     const content = contentTextarea.value.trim();
 
     if (!title) {
-      this.showFeedback('Digite um título para o texto', shadowRoot, 'warning');
+      this.showFeedback("Digite um título para o texto", shadowRoot, "warning");
       return;
     }
 
     if (!content) {
-      this.showFeedback('Digite o conteúdo do texto', shadowRoot, 'warning');
+      this.showFeedback("Digite o conteúdo do texto", shadowRoot, "warning");
       return;
     }
 
-    const texts = window.StorageUtils.load('texts', this.currentUserEmail, []);
+    const texts = window.StorageUtils.load("texts", this.currentUserEmail, []);
     const now = new Date().toISOString();
 
     if (this.currentTextId) {
       // Atualiza texto existente
-      const textIndex = texts.findIndex(text => text.id === this.currentTextId);
+      const textIndex = texts.findIndex(
+        (text) => text.id === this.currentTextId
+      );
       if (textIndex !== -1) {
         texts[textIndex].title = title;
         texts[textIndex].content = content;
@@ -334,99 +324,109 @@ window.OverlayManager = {
     } else {
       // Cria novo texto
       const newText = {
-        id: window.GeneratorUtils.generateId('text'),
+        id: window.GeneratorUtils.generateId("text"),
         title: title,
         content: content,
         created: now,
-        updated: now
+        updated: now,
       };
       texts.push(newText);
       this.currentTextId = newText.id;
     }
 
     // Salva no storage
-    window.StorageUtils.save('texts', texts, this.currentUserEmail);
+    window.StorageUtils.save("texts", texts, this.currentUserEmail);
 
     // Atualiza interface
     this.updateTextSelect(texts, shadowRoot);
 
     // Seleciona o texto atual no select
-    const textSelect = shadowRoot.querySelector('#text-select');
+    const textSelect = shadowRoot.querySelector("#text-select");
     if (textSelect) {
       textSelect.value = this.currentTextId;
     }
 
     // Registra log
-    this.logAction('save', title, shadowRoot);
+    this.logAction("save", title, shadowRoot);
 
-    this.showFeedback('Texto salvo com sucesso!', shadowRoot, 'success');
+    this.showFeedback("Texto salvo com sucesso!", shadowRoot, "success");
   },
 
   // Apaga texto
   deleteText: function (shadowRoot) {
     if (!this.currentTextId) {
-      this.showFeedback('Selecione um texto para apagar', shadowRoot, 'warning');
+      this.showFeedback(
+        "Selecione um texto para apagar",
+        shadowRoot,
+        "warning"
+      );
       return;
     }
 
-    if (!confirm('Tem certeza que deseja apagar este texto?')) {
+    if (!confirm("Tem certeza que deseja apagar este texto?")) {
       return;
     }
 
-    const texts = window.StorageUtils.load('texts', this.currentUserEmail, []);
-    const textToDelete = texts.find(text => text.id === this.currentTextId);
+    const texts = window.StorageUtils.load("texts", this.currentUserEmail, []);
+    const textToDelete = texts.find((text) => text.id === this.currentTextId);
 
     if (!textToDelete) {
-      this.showFeedback('Texto não encontrado', shadowRoot, 'error');
+      this.showFeedback("Texto não encontrado", shadowRoot, "error");
       return;
     }
 
     // Remove o texto
-    const filteredTexts = texts.filter(text => text.id !== this.currentTextId);
+    const filteredTexts = texts.filter(
+      (text) => text.id !== this.currentTextId
+    );
 
     // Salva no storage
-    window.StorageUtils.save('texts', filteredTexts, this.currentUserEmail);
+    window.StorageUtils.save("texts", filteredTexts, this.currentUserEmail);
 
     // Registra log
-    this.logAction('delete', textToDelete.title, shadowRoot);
+    this.logAction("delete", textToDelete.title, shadowRoot);
 
     // Limpa formulário e atualiza interface
     this.clearForm(shadowRoot);
     this.updateTextSelect(filteredTexts, shadowRoot);
 
-    this.showFeedback('Texto apagado com sucesso!', shadowRoot, 'success');
+    this.showFeedback("Texto apagado com sucesso!", shadowRoot, "success");
   },
 
   // Limpa formulário
   clearForm: function (shadowRoot) {
-    const titleInput = shadowRoot.querySelector('#text-title');
-    const contentTextarea = shadowRoot.querySelector('#text-content');
-    const textSelect = shadowRoot.querySelector('#text-select');
+    const titleInput = shadowRoot.querySelector("#text-title");
+    const contentTextarea = shadowRoot.querySelector("#text-content");
+    const textSelect = shadowRoot.querySelector("#text-select");
 
-    if (titleInput) titleInput.value = '';
-    if (contentTextarea) contentTextarea.value = '';
-    if (textSelect) textSelect.value = '';
+    if (titleInput) titleInput.value = "";
+    if (contentTextarea) contentTextarea.value = "";
+    if (textSelect) textSelect.value = "";
 
     this.currentTextId = null;
   },
 
   // Registra ação nos logs
   logAction: function (action, textTitle, shadowRoot) {
-    const settings = window.StorageUtils.load('settings', this.currentUserEmail, { storeLogs: false });
+    const settings = window.StorageUtils.load(
+      "settings",
+      this.currentUserEmail,
+      { storeLogs: false }
+    );
 
     if (!settings.storeLogs) return;
 
-    const logs = window.StorageUtils.load('logs', this.currentUserEmail, []);
+    const logs = window.StorageUtils.load("logs", this.currentUserEmail, []);
     const newLog = {
-      id: window.GeneratorUtils.generateId('log'),
+      id: window.GeneratorUtils.generateId("log"),
       action: action,
       textTitle: textTitle,
       timestamp: new Date().toISOString(),
-      email: this.currentUserEmail
+      email: this.currentUserEmail,
     };
 
     logs.push(newLog);
-    window.StorageUtils.save('logs', logs, this.currentUserEmail);
+    window.StorageUtils.save("logs", logs, this.currentUserEmail);
 
     // Atualiza exibição dos logs se estiver na aba de configurações
     this.updateLogsDisplay(shadowRoot);
@@ -434,8 +434,12 @@ window.OverlayManager = {
 
   // Carrega configurações
   loadSettings: function (shadowRoot) {
-    const settings = window.StorageUtils.load('settings', this.currentUserEmail, { storeLogs: false });
-    const storeLogsCheckbox = shadowRoot.querySelector('#store-logs-checkbox');
+    const settings = window.StorageUtils.load(
+      "settings",
+      this.currentUserEmail,
+      { storeLogs: false }
+    );
+    const storeLogsCheckbox = shadowRoot.querySelector("#store-logs-checkbox");
 
     if (storeLogsCheckbox) {
       storeLogsCheckbox.checked = settings.storeLogs;
@@ -446,82 +450,93 @@ window.OverlayManager = {
 
   // Salva configurações
   saveSettings: function (shadowRoot) {
-    const storeLogsCheckbox = shadowRoot.querySelector('#store-logs-checkbox');
+    const storeLogsCheckbox = shadowRoot.querySelector("#store-logs-checkbox");
 
     const settings = {
-      storeLogs: storeLogsCheckbox ? storeLogsCheckbox.checked : false
+      storeLogs: storeLogsCheckbox ? storeLogsCheckbox.checked : false,
     };
 
-    window.StorageUtils.save('settings', settings, this.currentUserEmail);
+    window.StorageUtils.save("settings", settings, this.currentUserEmail);
     this.updateLogsDisplay(shadowRoot);
 
-    this.showFeedback('Configurações salvas!', shadowRoot, 'success');
+    this.showFeedback("Configurações salvas!", shadowRoot, "success");
   },
 
   // Atualiza exibição dos logs
   updateLogsDisplay: function (shadowRoot) {
-    const settings = window.StorageUtils.load('settings', this.currentUserEmail, { storeLogs: false });
-    const logsSection = shadowRoot.querySelector('#logs-section');
-    const logsDisplay = shadowRoot.querySelector('#logs-display');
+    const settings = window.StorageUtils.load(
+      "settings",
+      this.currentUserEmail,
+      { storeLogs: false }
+    );
+    const logsSection = shadowRoot.querySelector("#logs-section");
+    const logsDisplay = shadowRoot.querySelector("#logs-display");
 
     if (!logsSection || !logsDisplay) return;
 
     if (settings.storeLogs) {
-      logsSection.style.display = 'block';
+      logsSection.style.display = "block";
 
-      const logs = window.StorageUtils.load('logs', this.currentUserEmail, []);
+      const logs = window.StorageUtils.load("logs", this.currentUserEmail, []);
 
       if (logs.length === 0) {
-        logsDisplay.textContent = 'Nenhum log registrado ainda.';
+        logsDisplay.textContent = "Nenhum log registrado ainda.";
       } else {
         // Ordena logs por data (mais recente primeiro)
-        const sortedLogs = logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        const sortedLogs = logs.sort(
+          (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+        );
 
-        logsDisplay.textContent = sortedLogs.map(log =>
-          `${window.GeneratorUtils.formatDate(log.timestamp)} - ${log.action.toUpperCase()}: "${log.textTitle}"`
-        ).join('\n');
+        logsDisplay.textContent = sortedLogs
+          .map(
+            (log) =>
+              `${window.GeneratorUtils.formatDate(
+                log.timestamp
+              )} - ${log.action.toUpperCase()}: "${log.textTitle}"`
+          )
+          .join("\n");
       }
     } else {
-      logsSection.style.display = 'none';
+      logsSection.style.display = "none";
     }
   },
 
   // Limpa logs
   clearLogs: function (shadowRoot) {
-    if (!confirm('Tem certeza que deseja limpar todos os logs?')) {
+    if (!confirm("Tem certeza que deseja limpar todos os logs?")) {
       return;
     }
 
-    window.StorageUtils.save('logs', [], this.currentUserEmail);
+    window.StorageUtils.save("logs", [], this.currentUserEmail);
     this.updateLogsDisplay(shadowRoot);
 
-    this.showFeedback('Logs limpos!', shadowRoot, 'info');
+    this.showFeedback("Logs limpos!", shadowRoot, "info");
   },
 
   // Mostra feedback
-  showFeedback: function (message, shadowRoot, type = 'success') {
+  showFeedback: function (message, shadowRoot, type = "success") {
     if (!shadowRoot) {
-      const container = document.getElementById('extension-overlay');
+      const container = document.getElementById("extension-overlay");
       shadowRoot = container ? container.shadowRoot : null;
     }
 
     if (!shadowRoot) return;
 
-    const feedback = shadowRoot.querySelector('#feedback');
+    const feedback = shadowRoot.querySelector("#feedback");
     if (feedback) {
       feedback.textContent = message;
       feedback.className = `feedback show ${type}`;
 
       setTimeout(() => {
-        feedback.classList.remove('show');
+        feedback.classList.remove("show");
       }, 3000);
     }
-  }
+  },
 };
 
 // Inicializa quando a página carrega
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => {
     window.OverlayManager.init();
   });
 } else {
