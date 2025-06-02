@@ -27,7 +27,7 @@ window.OverlayManager = {
     }
   },
 
-  // Cria e mostra o overlay
+  // Mostra o overlay
   showOverlay: async function () {
     if (document.getElementById("extension-overlay")) {
       const overlay = document.getElementById("extension-overlay");
@@ -36,6 +36,20 @@ window.OverlayManager = {
       return;
     }
 
+    await this.createOverlay();
+  },
+
+  // Esconde o overlay
+  hideOverlay: function () {
+    const overlay = document.getElementById("extension-overlay");
+    if (overlay) {
+      overlay.style.display = "none";
+      this.overlayVisible = false;
+    }
+  },
+
+  // Cria o overlay
+  createOverlay: async function () {
     try {
       // Cria o container principal
       const container = document.createElement("div");
@@ -99,15 +113,6 @@ window.OverlayManager = {
       console.log("Overlay criado e exibido");
     } catch (error) {
       console.error("Erro ao criar overlay:", error);
-    }
-  },
-
-  // Esconde o overlay
-  hideOverlay: function () {
-    const overlay = document.getElementById("extension-overlay");
-    if (overlay) {
-      overlay.style.display = "none";
-      this.overlayVisible = false;
     }
   },
 
