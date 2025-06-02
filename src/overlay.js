@@ -30,7 +30,8 @@ window.OverlayManager = {
   // Cria e mostra o overlay
   showOverlay: async function () {
     if (document.getElementById("extension-overlay")) {
-      document.getElementById("extension-overlay").style.display = "block";
+      const overlay = document.getElementById("extension-overlay");
+      overlay.style.display = "block";
       this.overlayVisible = true;
       return;
     }
@@ -39,6 +40,22 @@ window.OverlayManager = {
       // Cria o container principal
       const container = document.createElement("div");
       container.id = "extension-overlay";
+      container.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        width: 100vw;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 2147483647;
+        display: block;
+        margin: 0;
+        padding: 0;
+        border: none;
+        overflow: hidden;
+      `;
 
       // Cria Shadow DOM
       const shadowRoot = container.attachShadow({ mode: "open" });
@@ -51,7 +68,24 @@ window.OverlayManager = {
 
       // Injeta CSS e HTML no Shadow DOM
       shadowRoot.innerHTML = `
-        <style>${cssContent}</style>
+        <style>
+          :host {
+            all: initial;
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            border: none;
+            overflow: hidden;
+          }
+          ${cssContent}
+        </style>
         ${htmlContent}
       `;
 
