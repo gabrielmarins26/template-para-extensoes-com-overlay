@@ -2,15 +2,15 @@
   "manifest_version": 3,
   "name": "Chrome Extension Base",
   "version": "1.2",
-  "description": "Extensão base para desenvolvimento de outras extensões com overlay e sistema de abas",
-  "permissions": ["activeTab", "tabs", "identity", "identity.email"],
+  "description": "Overlay básico com sistema de abas para extensões Chrome.",
+  "permissions": ["activeTab", "tabs"],
   "background": {
     "service_worker": "src/background.js"
   },
   "content_scripts": [
     {
       "matches": ["*://example.com/*"],
-      "js": ["src/utils.js", "src/overlay.js"],
+      "js": ["src/overlay.js"],
       "run_at": "document_end"
     }
   ],

@@ -1,13 +1,9 @@
-chrome.action.onClicked.addListener((tab) => {
-  if (tab.url.includes("example.com")) {
-    chrome.tabs.sendMessage(tab.id, {
-      action: "toggle_overlay",
-    });
-  } else {
-    console.log("Extensão só funciona no domínio configurado");
-  }
+// Background script - Gerencia o toggle do overlay e update
+chrome.runtime.onInstalled.addListener(() => {
+  console.log("Extensão instalada");
 });
 
+// Escuta mensagens do content script
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "reload_extension") {
     chrome.runtime.reload();
@@ -17,4 +13,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     });
     return true; // Mantém o canal aberto para resposta assíncrona
   }
+});
+
+chrome.action.onClicked.addListener((tab) => {
+  chrome.tabs.sendMessage(tab.id, { action: "toggle_overlay" });
 });
