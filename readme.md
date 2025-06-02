@@ -1,53 +1,68 @@
-# Chrome Overlay Base
+# Template para Extensões Chrome com Overlay
 
-Uma base simples para extensões Chrome com overlay e sistema de abas.
+Este é um template base para desenvolvimento de extensões Chrome que inclui um sistema de overlay com abas. O template fornece uma estrutura pronta para uso, permitindo que você foque no desenvolvimento das funcionalidades específicas da sua extensão.
 
-## 📁 Estrutura de Arquivos
+## Funcionalidades
 
-```
-.
-├── manifest.json          # Configuração da extensão
-├── README.md              # Este arquivo
-├── src/
-│   ├── background.js      # Service Worker (toggle e update)
-│   └── overlay.js         # Gerenciador do overlay e abas
-└── templates/
-    ├── overlay.html       # Interface do overlay (header, abas e feedback)
-    └── overlay.css        # Estilos básicos do overlay e abas
-```
+- **Sistema de Overlay**: Interface flutuante que pode ser aberta/fechada em qualquer página
+- **Sistema de Abas**: Organização do conteúdo em abas para melhor navegação
+- **Feedback Visual**: Sistema de notificações para feedback ao usuário
+- **Atualização**: Botão para recarregar a extensão e a página atual
 
-## 🚀 Funcionalidades
+## Como Usar
 
-- Overlay modal com Shadow DOM
-- Header com título, botão de atualizar e fechar
-- Sistema de abas simples (2 abas de exemplo)
-- Área de feedback para mensagens rápidas
+1. **Instalação**
 
-## 🛠️ Como Usar
-
-1. **Instale a extensão no Chrome:**
-
-   - Baixe ou clone este repositório
-   - Acesse `chrome://extensions/`
+   - Clone este repositório
+   - Abra o Chrome e vá para `chrome://extensions/`
    - Ative o "Modo do desenvolvedor"
    - Clique em "Carregar sem compactação" e selecione a pasta do projeto
 
-2. **Personalize:**
+2. **Personalização**
 
-   - Edite `overlay.html` para mudar o conteúdo das abas
-   - Edite `overlay.css` para alterar o visual
-   - Edite `manifest.json` para mudar nome, descrição ou domínios permitidos
+   - Modifique o arquivo `manifest.json` para ajustar as permissões e URLs onde a extensão funcionará
+   - Edite `templates/overlay.html` para personalizar a interface do overlay
+   - Ajuste `templates/overlay.css` para modificar o estilo visual
+   - Implemente suas funcionalidades em `src/overlay.js`
 
-3. **Atalho de teclado:**
-   - Configure um atalho em `chrome://extensions/shortcuts` para abrir/fechar o overlay
+3. **Estrutura de Arquivos**
+   - `src/overlay.js`: Gerencia o overlay e suas funcionalidades
+   - `src/background.js`: Script de background da extensão
+   - `templates/overlay.html`: Template HTML do overlay
+   - `templates/overlay.css`: Estilos do overlay
+   - `manifest.json`: Configurações da extensão
 
-## ✂️ O que foi removido nesta versão
+## Desenvolvimento
 
-- Utilitários de texto, storage, validação, formatação, etc.
-- Lógica de gerenciamento de textos, configurações e logs
-- Responsividade avançada e estilos complexos
+### Sistema de Abas
 
-## 💡 Dicas
+O template inclui um sistema de abas pronto para uso. Para adicionar novas abas:
 
-- Para adicionar novas abas, basta replicar o botão e o conteúdo no HTML seguindo o padrão existente.
-- O CSS está enxuto, focado apenas no overlay e abas. Adicione seus próprios estilos conforme necessário.
+1. Adicione o botão da aba em `templates/overlay.html`:
+
+```html
+<button class="tab-btn" data-tab="novaAba">Nova Aba</button>
+```
+
+2. Adicione o conteúdo da aba:
+
+```html
+<div class="tab-content" id="novaAba-tab">
+  <h2>Conteúdo da Nova Aba</h2>
+  <p>Seu conteúdo aqui</p>
+</div>
+```
+
+### Feedback ao Usuário
+
+Para mostrar mensagens de feedback:
+
+```javascript
+window.OverlayManager.showFeedback("Sua mensagem", shadowRoot, "success");
+```
+
+Tipos de feedback disponíveis: "success", "error", "info"
+
+### Atualização
+
+O template inclui um botão de atualização que permite recarregar a extensão e a página atual. Use-o durante o desenvolvimento para testar alterações.
